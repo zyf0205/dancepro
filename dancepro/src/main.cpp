@@ -242,10 +242,6 @@ void http_task(void *pvParameters) {
     vTaskDelay(1000 / portTICK_PERIOD_MS);
   }
   M5.Log.println("wifi连接成功，HTTP服务器任务开始\n");
-  // // 修复字符串连接问题
-  // char ipBuffer[20];
-  // sprintf(ipBuffer, "WiFi已连接，IP: %s", WiFi.localIP().toString().c_str());
-  // M5.Log.println(ipBuffer);
   // 初始化HTTP服务器
   setupHTTPServer();
   // 注册数据回调函数

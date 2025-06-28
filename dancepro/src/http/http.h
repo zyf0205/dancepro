@@ -10,9 +10,7 @@
 // HTTP服务器状态结构体
 struct HTTPServerStatus {
     bool isRunning;          // 服务器是否运行
-    unsigned long uptime;    // 服务器运行时间(毫秒)
     unsigned long lastRequest; // 上次请求时间(毫秒)
-    uint32_t requestCount;   // 请求计数
     uint16_t errorCount;     // 错误计数
     bool clientConnected;    // 是否有客户端连接
 };

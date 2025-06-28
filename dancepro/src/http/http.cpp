@@ -18,7 +18,7 @@ static SemaphoreHandle_t noteMapMutex = NULL;
 
 // 初始化HTTP服务器
 void setupHTTPServer() {
-    // 创建互斥锁
+    // 创建互斥锁，防止多个线程同时访问音符映射数据导致json损坏
     if (noteMapMutex == NULL) {
         noteMapMutex = xSemaphoreCreateMutex();
     }
@@ -139,9 +139,7 @@ HTTPServerStatus getHTTPServerStatus() {
     HTTPServerStatus status;
     
     status.isRunning = serverRunning;
-    status.uptime = 0;  // 不再跟踪
     status.lastRequest = lastRequestTime;
-    status.requestCount = 0;  // 不再计数
     status.errorCount = errorCount;
     status.clientConnected = server.client().connected();
     

@@ -1,14 +1,14 @@
 #include <M5Unified.h>
 #include <Arduino.h>
-#include "imu/imu.h"//IMU数据
-#include "http/http.h"//HTTP
-#include "wifi/my_wifi.h"//WiFi连接
-#include "wifi/wifi_ui.h"//WiFi UI
-#include "note/note.h"//音乐处理
-#include "note/note_ui.h"//音乐UI
-#include "home/home_ui.h"//主界面UI
+#include "imu/imu.h"
+#include "http/http.h"
+#include "wifi/my_wifi.h"
+#include "note/note.h"
+#include "home/home_ui.h"
+#include "wifi/wifi_ui.h"
+#include "note/note_ui.h"
 
-// 任务句柄
+//句柄
 TaskHandle_t buttonTaskHandle = NULL;
 TaskHandle_t imuTaskHandle = NULL;
 TaskHandle_t wifiTaskHandle = NULL;
@@ -16,23 +16,17 @@ TaskHandle_t uiTaskHandle = NULL;
 TaskHandle_t httpTaskHandle = NULL;
 TaskHandle_t noteTaskHandle = NULL;
 
-// imu数据
-extern IMUData ImuData;
-// 页面
-int page = 0;
+//变量
+extern IMUData ImuData;// imu数据
+int page = 0;// 页面
 int lastPage=0;
-// 是否可以切换页面
-bool canSwitchPage = true;
-//是否正在录制
-bool isRecording = false;
+bool canSwitchPage = true;// 是否可以切换页面
+bool isRecording = false;//是否正在录制
 unsigned long recordStartTime = 0;  // 记录开始时间
 unsigned long currentRecordTime = 0;  // 当前录制时间
-//是否初始化时间
-bool isTimeInitialized = false;
-//音乐json字符串
-String musicJSON = "";
-//是否需要重新绘制各个ui界面
-extern bool noteUIRedrawNeeded;
+bool isTimeInitialized = false;//是否初始化时间
+String musicJSON = "";//音乐json字符串
+extern bool noteUIRedrawNeeded;//是否需要重新绘制各个ui界面
 extern bool wifiUIRedrawNeeded;
 extern bool homeUIRedrawNeeded;
 
@@ -274,9 +268,6 @@ void http_task(void *pvParameters) {
     vTaskDelay(10 / portTICK_PERIOD_MS);
   }
 }
-
-
-
 
 //开始任务,用于创建其他任务
 void start_task(void *pvParameters)

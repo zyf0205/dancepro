@@ -88,9 +88,6 @@ void setupWiFi() {
 
 // 监控WiFi状态 - 在loop中定期调用
 void monitorWiFi() {
-    // 更新按钮状态
-    M5.update();
-        
     // 根据当前状态处理
     switch (wifiStatus) {
         case WIFI_CONNECTING:

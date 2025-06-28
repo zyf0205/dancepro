@@ -131,25 +131,31 @@ void drawStatusBar() {
   int battWidth = 20;
   int battHeight = 10;
   
-  // 绘制电池外框
   M5.Display.drawRect(battX, battY, battWidth, battHeight, COLOR_TEXT);
   M5.Display.drawRect(battX + battWidth, battY + 2, 2, battHeight - 4, COLOR_TEXT);
   
-  // 确定电池颜色
-  uint16_t batteryColor;
-  if (batteryLevel < 20) {
-    batteryColor = COLOR_BATTERY_LOW;
-  } else if (batteryLevel < 50) {
-    batteryColor = COLOR_BATTERY_MID;
-  } else {
-    batteryColor = COLOR_BATTERY_HIGH;
+  if (!isCharging) {
+    // 确定电池颜色
+    uint16_t batteryColor;
+    if (batteryLevel < 20) {
+      batteryColor = COLOR_BATTERY_LOW;
+    } else if (batteryLevel < 50) {
+      batteryColor = COLOR_BATTERY_MID;
+    } else {
+      batteryColor = COLOR_BATTERY_HIGH;
+    }
+    
+    // 绘制电池填充
+    int fillWidth = (battWidth - 2) * batteryLevel / 100.0;
+    M5.Display.fillRect(battX + 1, battY + 1, fillWidth, battHeight - 2, batteryColor);
+    
+    // 显示电池百分比
+    M5.Display.setTextSize(1);
+    M5.Display.setTextColor(COLOR_TEXT);
+    M5.Display.setCursor(battX - 30, battY + 2);
+    M5.Display.printf("%d%%", (int)batteryLevel);
   }
   
-  // 绘制电池填充
-  int fillWidth = (battWidth - 2) * batteryLevel / 100.0;
-  M5.Display.fillRect(battX + 1, battY + 1, fillWidth, battHeight - 2, batteryColor);
-  
-  // 如果正在充电，绘制闪电图标
   if (isCharging) {
     M5.Display.fillTriangle(
       battX + battWidth/2 - 2, battY + 2,
@@ -164,12 +170,6 @@ void drawStatusBar() {
       COLOR_TEXT
     );
   }
-  
-  // 显示电池百分比
-  M5.Display.setTextSize(1);
-  M5.Display.setTextColor(COLOR_TEXT);
-  M5.Display.setCursor(battX - 30, battY + 2);
-  M5.Display.printf("%d%%", (int)batteryLevel);
 }
 
 // 绘制音符律动动画 - 优化版本，防止屏闪

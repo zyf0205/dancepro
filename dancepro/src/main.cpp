@@ -171,7 +171,13 @@ void ui_task(void *pvParameters)
 //音乐处理任务
 void note_task(void *pvParameters) {
   for (;;) {
-    musicJSON = mapIMUToMusicJSON(ImuData,musicJSON);
+    // 检查 JSON 大小，超过一定限制就停止添加
+    if (musicJSON.length() < 10000) { // 设置合理的大小限制，例如 10KB
+      musicJSON = mapIMUToMusicJSON(ImuData, musicJSON);
+    } else {
+      M5.Log.println("警告：JSON 数据过大，停止记录");
+      isRecording = false; // 自动停止录制
+    }
     vTaskDelay(500 / portTICK_PERIOD_MS);
   }
 }
@@ -191,10 +197,10 @@ void button_task(void *pvParameters)
       recordStartTime = millis();
       if(isRecording){
         musicJSON = "[]";
-        xTaskCreate(note_task, "NoteTask", 4096, NULL, 1, &noteTaskHandle);
+        xTaskCreate(note_task, "NoteTask", 8192, NULL, 1, &noteTaskHandle);
       }else{
         vTaskDelete(noteTaskHandle);
-        M5.Log.println(musicJSON.c_str());
+        //M5.Log.println(musicJSON.c_str());
         uploadAndReplaceNoteData(musicJSON);
       }
     }
@@ -269,7 +275,7 @@ void http_task(void *pvParameters) {
 void start_task(void *pvParameters)
 {
   //按钮任务
-  xTaskCreate(button_task, "ButtonTask", 4096, NULL, 2, &buttonTaskHandle);
+  xTaskCreate(button_task, "ButtonTask", 8192, NULL, 2, &buttonTaskHandle);
   //imu任务
   xTaskCreate(imu_task, "IMUTask", 4096, NULL, 1, &imuTaskHandle);
   //ui任务

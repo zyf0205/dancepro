@@ -421,7 +421,7 @@ String mapIMUToMusicJSON(const IMUData& imu, const String& existingJson) {
     }
     
     // 创建JSON对象
-    String newEntry = "{\"note\":" + String(note) + ",\"duration\":" + String(duration) + "}";
+    String newEntry = "{\"n\":" + String(note) + ",\"t\":" + String(duration) + "}";
     
     // 添加到现有JSON字符串
     String resultJson;

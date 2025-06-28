@@ -166,7 +166,16 @@ bool uploadAndReplaceNoteData(const String& jsonData) {
         noteMapMutex = xSemaphoreCreateMutex();
     }
     
-    if (xSemaphoreTake(noteMapMutex, portMAX_DELAY)) {
+    // 检查数据大小
+    if (jsonData.length() > 20000) { // 设置合理的大小限制
+        M5.Log.println("[HTTP] 音符数据过大，无法上传");
+        return false;
+    }
+    
+    if (xSemaphoreTake(noteMapMutex, 1000 / portTICK_PERIOD_MS)) { // 添加超时
+        // 先释放旧数据内存
+        latestNoteMapData = "";
+        // 确保有足够内存后再复制
         latestNoteMapData = jsonData;
         
         M5.Log.printf("[HTTP] 音符数据已更新，大小: %d 字节\n", jsonData.length());

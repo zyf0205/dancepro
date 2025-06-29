@@ -8,7 +8,7 @@
 #include "wifi/wifi_ui.h"
 #include "note/note_ui.h"
 
-//句柄
+// 句柄
 TaskHandle_t buttonTaskHandle = NULL;
 TaskHandle_t imuTaskHandle = NULL;
 TaskHandle_t wifiTaskHandle = NULL;
@@ -16,21 +16,21 @@ TaskHandle_t uiTaskHandle = NULL;
 TaskHandle_t httpTaskHandle = NULL;
 TaskHandle_t noteTaskHandle = NULL;
 
-//变量
-extern IMUData ImuData;// imu数据
-int page = 0;// 页面
-int lastPage=0;
-bool canSwitchPage = true;// 是否可以切换页面
-bool isRecording = false;//是否正在录制
-unsigned long recordStartTime = 0;  // 记录开始时间
-unsigned long currentRecordTime = 0;  // 当前录制时间
-bool isTimeInitialized = false;//是否初始化时间
-String musicJSON = "";//音乐json字符串
-extern bool noteUIRedrawNeeded;//是否需要重新绘制各个ui界面
+// 变量
+extern IMUData ImuData; // imu数据
+int page = 0;           // 页面
+int lastPage = 0;
+bool canSwitchPage = true;           // 是否可以切换页面
+bool isRecording = false;            // 是否正在录制
+unsigned long recordStartTime = 0;   // 记录开始时间
+unsigned long currentRecordTime = 0; // 当前录制时间
+bool isTimeInitialized = false;      // 是否初始化时间
+String musicJSON = "";               // 音乐json字符串
+extern bool noteUIRedrawNeeded;      // 是否需要重新绘制各个ui界面
 extern bool wifiUIRedrawNeeded;
 extern bool homeUIRedrawNeeded;
 
-//传入任务句柄,删除任务
+// 传入任务句柄,删除任务
 void deleteTask(TaskHandle_t &taskHandle)
 {
   if (taskHandle != NULL)
@@ -47,7 +47,7 @@ void deleteTask(TaskHandle_t &taskHandle)
   }
 }
 
-//通过imu数据判断手腕动作,并切换页面
+// 通过imu数据判断手腕动作,并切换页面
 void imu_task(void *pvParameters)
 {
   ImuData = {0};
@@ -75,8 +75,9 @@ void imu_task(void *pvParameters)
       // 基于角度变化和当前状态判断手腕动作
       if (currentTime - lastPageChangeTime > debounceTime)
       {
-        //正在录制，不进行页面切换
-        if(isRecording){
+        // 正在录制，不进行页面切换
+        if (isRecording)
+        {
           lastPageChangeTime = currentTime;
           continue;
         }
@@ -116,14 +117,15 @@ void imu_task(void *pvParameters)
   }
 }
 
-//wifi连接任务
+// wifi连接任务
 void wifi_task(void *pvParameters)
 {
   setupWiFi();
   for (;;)
   {
-    if(getWiFiStatus()==WIFI_CONNECTED&&!isTimeInitialized){
-      isTimeInitialized=true;
+    if (getWiFiStatus() == WIFI_CONNECTED && !isTimeInitialized)
+    {
+      isTimeInitialized = true;
       initTimeAsync();
     }
     monitorWiFi();
@@ -131,50 +133,60 @@ void wifi_task(void *pvParameters)
   }
 }
 
-//ui显示任务
+// ui显示任务
 void ui_task(void *pvParameters)
 {
-  for (;;) 
+  for (;;)
   {
-    switch(page){
-      case 0://主界面
-        if(lastPage!=page){
-          homeUIRedrawNeeded=true;
-          lastPage=page;
-        }
-        displayHomeUI();
-        break;
-      case 1://音符录制界面
-        if(lastPage!=page){
-          noteUIRedrawNeeded=true;
-          lastPage=page;
-        }
-        if(isRecording){
-          
-          currentRecordTime = millis() - recordStartTime;
-        }
-        displayNoteUI(isRecording,currentRecordTime,ImuData);
-        break;
-      case 2://wifi界面
-        if(lastPage!=page){
-          wifiUIRedrawNeeded=true;
-          lastPage=page;
-        }
-        //M5.Display.clear();
-        displayWiFiUI(getWiFiStatus());
-        break;
+    switch (page)
+    {
+    case 0: // 主界面
+      if (lastPage != page)
+      {
+        homeUIRedrawNeeded = true;
+        lastPage = page;
+      }
+      displayHomeUI();
+      break;
+    case 1: // 音符录制界面
+      if (lastPage != page)
+      {
+        noteUIRedrawNeeded = true;
+        lastPage = page;
+      }
+      if (isRecording)
+      {
+
+        currentRecordTime = millis() - recordStartTime;
+      }
+      displayNoteUI(isRecording, currentRecordTime, ImuData);
+      break;
+    case 2: // wifi界面
+      if (lastPage != page)
+      {
+        wifiUIRedrawNeeded = true;
+        lastPage = page;
+      }
+      // M5.Display.clear();
+      displayWiFiUI(getWiFiStatus());
+      break;
     }
     vTaskDelay(100 / portTICK_PERIOD_MS);
   }
 }
 
-//音乐处理任务
-void note_task(void *pvParameters) {
-  for (;;) {
+// 音乐处理任务
+void note_task(void *pvParameters)
+{
+  for (;;)
+  {
     // 检查 JSON 大小，超过一定限制就停止添加
-    if (musicJSON.length() < 10000) { // 设置合理的大小限制，例如 10KB
+    if (musicJSON.length() < 10000)
+    { // 设置合理的大小限制，例如 10KB
       musicJSON = mapIMUToMusicJSON(ImuData, musicJSON);
-    } else {
+    }
+    else
+    {
       M5.Log.println("警告：JSON 数据过大，停止记录");
       isRecording = false; // 自动停止录制
     }
@@ -182,29 +194,35 @@ void note_task(void *pvParameters) {
   }
 }
 
-//通过按钮进入页面功能
+// 通过按钮进入页面功能
 void button_task(void *pvParameters)
 {
   for (;;)
   {
     M5.update(); // 必须首先调用，更新按钮状态
-    if(page==0&&M5.BtnA.wasPressed()){
+    if (page == 0 && M5.BtnA.wasPressed())
+    {
       M5.Log.println("进入页面0");
     }
-    if(page==1&&M5.BtnA.wasPressed()){
+    if (page == 1 && M5.BtnA.wasPressed())
+    {
       M5.Log.println("进入页面1");
       isRecording = !isRecording;
       recordStartTime = millis();
-      if(isRecording){
+      if (isRecording)
+      {
         musicJSON = "[]";
         xTaskCreate(note_task, "NoteTask", 8192, NULL, 1, &noteTaskHandle);
-      }else{
+      }
+      else
+      {
         vTaskDelete(noteTaskHandle);
-        //M5.Log.println(musicJSON.c_str());
+        // M5.Log.println(musicJSON.c_str());
         uploadAndReplaceNoteData(musicJSON);
       }
     }
-    if(page==2&&M5.BtnA.wasPressed()){
+    if (page == 2 && M5.BtnA.wasPressed())
+    {
       M5.Log.println("进入页面2");
       resetWiFi();
     }
@@ -213,9 +231,11 @@ void button_task(void *pvParameters)
 }
 
 // http 注册数据回调函数
-void registerCallbacks() {
+void registerCallbacks()
+{
   // 注册处理设置的回调
-  setDataReceiveCallback("settings", [](const JsonDocument& data) {
+  setDataReceiveCallback("settings", [](const JsonDocument &data)
+                         {
     // 处理设置
     if (!data["brightness"].isNull()) { // 修改为使用isNull()
       int brightness = data["brightness"].as<int>();
@@ -236,14 +256,15 @@ void registerCallbacks() {
         M5.Log.println("进入休眠模式...");
         M5.Power.deepSleep();
       }
-    }
-  });
+    } });
 }
 
 // HTTP服务器任务
-void http_task(void *pvParameters) {
+void http_task(void *pvParameters)
+{
   // 等待WiFi连接
-  while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED)
+  {
     M5.Log.println("等待WiFi连接...");
     vTaskDelay(1000 / portTICK_PERIOD_MS);
   }
@@ -253,15 +274,18 @@ void http_task(void *pvParameters) {
   // 注册数据回调函数
   registerCallbacks();
   // 任务循环
-  for (;;) {
+  for (;;)
+  {
     // 处理HTTP请求
     handleHTTPRequests();
     // 检查服务器状态
     static unsigned long lastCheckTime = 0;
-    if (millis() - lastCheckTime > 30000) { // 每30秒检查一次
+    if (millis() - lastCheckTime > 30000)
+    { // 每30秒检查一次
       lastCheckTime = millis();
       HTTPServerStatus status = getHTTPServerStatus();
-      if (!status.isRunning) {
+      if (!status.isRunning)
+      {
         M5.Log.println("HTTP服务器未运行，尝试重启...");
         restartHTTPServer();
       }
@@ -271,24 +295,24 @@ void http_task(void *pvParameters) {
   }
 }
 
-//开始任务,用于创建其他任务
+// 开始任务,用于创建其他任务
 void start_task(void *pvParameters)
 {
-  //按钮任务
+  // 按钮任务
   xTaskCreate(button_task, "ButtonTask", 8192, NULL, 2, &buttonTaskHandle);
-  //imu任务
+  // imu任务
   xTaskCreate(imu_task, "IMUTask", 4096, NULL, 1, &imuTaskHandle);
-  //ui任务
+  // ui任务
   xTaskCreate(ui_task, "UITask", 4096, NULL, 1, &uiTaskHandle);
-  //wifi任务
+  // wifi任务
   xTaskCreate(wifi_task, "WifiTask", 4096, NULL, 1, &wifiTaskHandle);
-  //http任务
+  // http任务
   xTaskCreate(http_task, "HttpTask", 4096, NULL, 1, &httpTaskHandle);
 
   vTaskDelete(NULL);
 }
 
-//主函数
+// 主函数
 void setup()
 {
   // 正确配置M5Unified，启用串口输出
@@ -299,7 +323,6 @@ void setup()
   // 创建开始任务
   xTaskCreate(start_task, "StartTask", 4096, NULL, 1, NULL);
 }
-
 
 void loop()
 {
